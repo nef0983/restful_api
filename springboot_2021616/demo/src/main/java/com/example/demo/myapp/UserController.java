@@ -1,10 +1,10 @@
 package com.example.demo.myapp;
 
 import java.util.List;
-import java.util.Optional;
+
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,60 +15,42 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserController {
 
+	// UserServiceImplement 重新包裝JAP 來調用
 	@Autowired
-	private UserServiceImplement uServiceImp;
+	UserServiceImplement uServiceimp;
 
 	@Autowired
-	private UserRepository uRepostory;
-
-	@GetMapping("/show")
-	public String show() {
-		return uServiceImp.show();
-	}
-
-	@GetMapping("/test")
-	public String show2() {
-
-		return "test";
-	}
+	UserRepository uRepository;
 
 	@GetMapping("/users")
-	public List<UserEntity> getusers() {
-		return uRepostory.findAll();
+
+	public List<UserEntity> findAll() {
+		return uServiceimp.findAll();
 	}
 
-//	  RESTful API 在HTTP傳送方式就先分歧 使用"GET"模式傳送URL http://localhost:8080/request 會執行get() ,
-//	   使用"POST"模式傳送URL http://localhost:8080/request 會執行post()。
+//	  RESTful API 在HTTP傳送方式就先分歧 使用"GET"模式傳送URL http://localhost:8080/
 
-	@GetMapping("/request")
-	public String get() {
-		return "get";
+	
+	@GetMapping("/users/{user}")// find by user
+	public UserEntity findByUser(@PathVariable String user) {
+
+		return uServiceimp.getByUser(user);
 	}
 
-	@PostMapping("/request")
-	public String post() {
-		return "post";
+	@PostMapping("/users/")
+	public UserEntity addUser(@Valid @RequestBody UserEntity userentity) {
+
+		uServiceimp.addUser(userentity);
+		return userentity;
 	}
 
-	@GetMapping("/users/{id}") // @PathVariable 解析路徑 ("/get/user/{id}" 取的{id} id 查詢user資訊
-	public Optional<UserEntity> getuserById(@PathVariable Long id) {
+	@PutMapping("/users/{id}")
+	public UserEntity updataUser(@PathVariable Long id, @RequestBody UserEntity userentity) {
+		
+		userentity.setId(id);
+		uServiceimp.updateUser(userentity);
+		return userentity;
 
-		return uRepostory.findById(id);
-
-	}
-
-	@DeleteMapping("/users/{id}")
-	public String deleteUser(@PathVariable Long id) {
-
-		uRepostory.deleteById(id);
-		return "Deleted user by Id : " + id;
-	}
-
-	@PutMapping("/users/")
-	public String addUser(@RequestBody UserEntity userentity) {
-
-		uRepostory.save(userentity);
-		return "Add user byUsername :" + userentity.getUsername();
 	}
 
 }
